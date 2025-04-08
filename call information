@@ -1,0 +1,25 @@
+import requests
+
+# Retrieve data from retell client
+call_id = "call_e790d7c525441064dead5c02366"  # Replace with your actual call ID
+call_data_response = retell_client.call.retrieve(call_id=call_id)
+
+# Check if the response is valid and parse it as JSON using model_dump_json
+
+call_data = call_data_response.model_dump_json()  # Use model_dump_json() instead of json()
+
+
+# Define the webhook URL
+webhook_url = "https://jamshaidvyna.app.n8n.cloud/webhook-test/3912ad82-14d3-4025-aa57-a1bc590a449d"
+
+# Sending a POST request with the data from retell_client
+if call_data:
+    response = requests.get(webhook_url, json=call_data)
+
+    # Check the response status
+    if response.status_code == 200:
+        print("Successfully posted to the webhook.")
+    else:
+        print(f"Failed to post to the webhook. Status code: {response.status_code}")
+else:
+    print("No valid data to post.")
