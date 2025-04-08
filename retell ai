@@ -1,0 +1,17 @@
+response = retell_client.call.create_phone_call(
+    from_number="+19163142703",  # Your phone number
+    to_number="+12067854499",    # Recipient's phone number
+    metadata={
+        "campaign_id": "solar_campaign_2025",
+        "caller_name": "Retell AI"
+    },
+    override_agent_id="agent_5811a8f833b8170737834f6cb2",  # Optional: Override default agent
+    retell_llm_dynamic_variables={
+        "customer_name": "Sam",
+        "company_name": "SolarCo"
+    },
+   
+    timeout=30.0  # Timeout of 30 seconds
+)
+
+print("Call initiated successfully:", response)
