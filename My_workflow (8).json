@@ -1,0 +1,350 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "21cddc22-60f0-402c-8851-cbfc526c61e3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        300
+      ],
+      "id": "1e7c8f06-18d0-4f52-95bd-6ee832b8b17f",
+      "name": "Webhook",
+      "webhookId": "21cddc22-60f0-402c-8851-cbfc526c61e3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://rest.gohighlevel.com/v1/contacts/",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "highLevelApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJsb2NhdGlvbl9pZCI6Im13V05ydEtOYTBsTDdQdDlkYTJNIiwidmVyc2lvbiI6MSwiaWF0IjoxNzQzNDA5NjgxMjg3LCJzdWIiOiJBVEJmUnh5aHVSbFRiWnFRbnRrSiJ9.nzGnp_DdcUmQmNC2dZGdwKuIGwhcPKPMs4SBTfwh0lQ Content-Type\tapplication/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"firstName\": \"{{ $json.firstName }}\",\n  \"lastName\": \"{{ $json.lastName }}\",\n  \"phone\": \"{{ $json.phone }}\",\n  \"locationId\": \"mwWNrtKNa0lL7Pt9da2M\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -20,
+        320
+      ],
+      "id": "965dc24e-1e19-4ce2-9a49-49d288f92b8e",
+      "name": "HTTP Request",
+      "credentials": {
+        "highLevelApi": {
+          "id": "FrtyZmDeN00gzIaj",
+          "name": "HighLevel account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "instructions": "body, turn bodyf to table\n, with column name\n",
+        "codeGeneratedForPrompt": "body, turn bodyf to table\n, with column name\n",
+        "jsCode": "const items = $input.all();\nconst result = items.map((item) => {\n  const body = item.json.body.map((bodyItem) => {\n    return {\n      Name: bodyItem.Name,\n      Website: bodyItem.Website,\n      Phone: bodyItem.Phone,\n      Address: bodyItem.Address,\n      Rating: bodyItem.Rating,\n      \"Recent things\": bodyItem[\"Recent things\"],\n    };\n  });\n  return { body };\n});\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.aiTransform",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        300
+      ],
+      "id": "d5887fb3-a431-4259-a5f9-f221ae7fb764",
+      "name": "AI Transform"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = [];\n\nfor (const contact of $input.first().json.body) {\n  const [firstName, ...lastName] = contact.Name.split(\" \");\n  items.push({\n    json: {\n      firstName,\n      lastName: lastName.join(\" \"),\n      email: contact.Email,\n      phone: contact.Phone,\n      locationId: \"mwWNrtKNa0lL7Pt9da2M\"\n    }\n  });\n}\n\nreturn items;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -360,
+        300
+      ],
+      "id": "4fbff361-338e-46e1-8596-95b35077e985",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "from": "+19163142703",
+        "to": "={{ $json.contact.phone }}",
+        "message": "={{ $json.contact.firstName }} Hi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        200,
+        320
+      ],
+      "id": "3188e6c5-c85e-42df-95db-c870682d2489",
+      "name": "Twilio",
+      "credentials": {
+        "twilioApi": {
+          "id": "MRDmqLnlpTvQ3Ldz",
+          "name": "Twilio account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "3912ad82-14d3-4025-aa57-a1bc590a449d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -700,
+        20
+      ],
+      "id": "441b3f6d-ce2d-4c78-88a1-12abfa88a2e2",
+      "name": "Webhook1",
+      "webhookId": "3912ad82-14d3-4025-aa57-a1bc590a449d"
+    },
+    {
+      "parameters": {
+        "instructions": "call_id = \ncall_status = \ncall_type = \ncall_summary = \ncall_cost =\ncall_duration = \ndisconnection_reason =\nget these from body",
+        "codeGeneratedForPrompt": "call_id = \ncall_status = \ncall_type = \ncall_summary = \ncall_cost =\ncall_duration = \ndisconnection_reason =\nget these from body",
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  const body = JSON.parse(item?.json?.body);\n  return {\n    call_id: body?.call_id,\n    call_status: body?.call_status,\n    call_type: body?.call_type,\n    call_summary: body?.call_analysis?.call_summary,\n    call_cost: body?.call_cost?.combined_cost,\n    call_duration: body?.call_cost?.total_duration_seconds,\n    disconnection_reason: body?.disconnection_reason,\n  };\n});\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.aiTransform",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        40
+      ],
+      "id": "d8ac35e7-904d-4b03-9cca-a704dc04920a",
+      "name": "AI Transform1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a helpful assistant. Analyze the text and tell if the user is interested in services. Respond with only 'Yes' or 'No'.",
+              "role": "system"
+            },
+            {
+              "content": "Based on the following data, determine if the user is interested in services (yes or no):\n\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -300,
+        40
+      ],
+      "id": "ffa9ce19-ad3a-497f-b467-dbd1c5a044e2",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "8LQFSvH1Pe4wHCdo",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "1e639f0d-c991-4826-ac85-c3a3047db746",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        60,
+        40
+      ],
+      "id": "577b6974-3b9e-47a8-b8a7-20a6a87482a6",
+      "name": "Webhook2",
+      "webhookId": "1e639f0d-c991-4826-ac85-c3a3047db746"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7fa5fb86-0339-4a84-9c35-0a3cdf62f477",
+              "leftValue": "={{ $json.query.interested }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        280,
+        40
+      ],
+      "id": "6b5b13e3-f5cf-4073-b616-2ccfb45f5431",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendarId": "WrqPxZ2KtnT8nP43PNxZ",
+        "locationId": "mwWNrtKNa0lL7Pt9da2M",
+        "contactId": "Z1o5vvhFwi2OdjLSKMZj",
+        "startTime": "1745143200000",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 2,
+      "position": [
+        500,
+        40
+      ],
+      "id": "6a88cebd-c82a-4bcc-83f9-52ffff6bd0dd",
+      "name": "HighLevel",
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "ucuBusYE4i3hHZ9O",
+          "name": "HighLevel account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Transform",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Twilio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Transform": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "AI Transform1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Transform1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook2": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "HighLevel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "87a17afa-110b-4111-abaf-207cf0b8b0a3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2a74ea6735836fc09be982bd0f4ebad96288fe038bb7d9ab784117071d6a1646"
+  },
+  "id": "iWLrWHJA0OKYKSSk",
+  "tags": []
+}
